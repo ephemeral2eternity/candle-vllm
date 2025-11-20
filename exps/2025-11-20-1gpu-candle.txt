@@ -1,0 +1,32 @@
+================================================================================
+BENCHMARK SUMMARY
+================================================================================
+Batch size: 16
+Max tokens per request: 1024
+Total requests: 16
+
+--- Latency Metrics ---
+Time to First Token (TTFT):
+  Mean: 28.361s
+  Median: 30.063s
+  Min: 1.607s
+  Max: 31.018s
+  Std Dev: 7.154s
+
+Total Time per Request:
+  Mean: 30.537s
+  Median: 30.182s
+  Min: 29.325s
+  Max: 36.426s
+  Std Dev: 1.655s
+
+--- Throughput Metrics ---
+Total tokens generated: 15906
+Total benchmark time: 36.426s
+Overall throughput: 436.67 tokens/second
+Per-request throughput:
+  Mean: 32.57 tokens/second
+  Median: 32.50 tokens/second
+  Min: 23.22 tokens/second
+  Max: 38.46 tokens/second
+================================================================================

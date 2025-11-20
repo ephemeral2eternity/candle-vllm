@@ -1,0 +1,34 @@
+Auto-detected model: Qwen/Qwen3-0.6B
+
+================================================================================
+BENCHMARK SUMMARY
+================================================================================
+Batch size: 16
+Max tokens per request: 1024
+Total requests: 16
+
+--- Latency Metrics ---
+Time to First Token (TTFT):
+  Mean: 13.501s
+  Median: 14.278s
+  Min: 0.902s
+  Max: 15.225s
+  Std Dev: 3.404s
+
+Total Time per Request:
+  Mean: 14.404s
+  Median: 14.403s
+  Min: 13.459s
+  Max: 15.353s
+  Std Dev: 0.600s
+
+--- Throughput Metrics ---
+Total tokens generated: 16026
+Total benchmark time: 15.353s
+Overall throughput: 1043.81 tokens/second
+Per-request throughput:
+  Mean: 69.60 tokens/second
+  Median: 70.85 tokens/second
+  Min: 64.38 tokens/second
+  Max: 75.23 tokens/second
+================================================================================

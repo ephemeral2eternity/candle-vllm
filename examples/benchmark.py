@@ -2,10 +2,11 @@ import openai
 import asyncio
 from openai import Stream
 from openai.types.chat import ChatCompletionChunk
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 import argparse
 import time
 import statistics
+import requests
 # Run candle-vllm service: cargo run --release -- --port 2000 --model-id <MODEL_ID> <MODEL_TYPE> --repeat-last-n 64
 # MODEL_ID is the huggingface model id or local weight path
 # MODEL_TYPE is one of ["llama", "llama3", "mistral", "phi2", "phi3", "qwen2", "qwen3", "gemma", "yi", "stable-lm"]
@@ -59,10 +60,34 @@ async def stream_response(response_idx, stream: Stream[ChatCompletionChunk], req
     
     return (response_idx, result, time_to_first_token, total_time, token_count)
 
-async def benchmark(batch, max_tokens=1024, port=2000):
+def get_model_from_server(port: int) -> Optional[str]:
+    """Try to get the model name from the server's /v1/models endpoint."""
+    try:
+        response = requests.get(f"http://localhost:{port}/v1/models", timeout=5)
+        if response.status_code == 200:
+            data = response.json()
+            if "data" in data and len(data["data"]) > 0:
+                return data["data"][0]["id"]
+    except Exception as e:
+        print(f"Warning: Could not auto-detect model from server: {e}")
+    return None
+
+async def benchmark(batch, max_tokens=1024, port=2000, model: Optional[str] = None):
     openai.base_url = "http://localhost:"+str(port)+"/v1/"
 
-    model = "any" # model used dependent on the server side
+    # Auto-detect model if not provided
+    if model is None:
+        # Run the synchronous request in a thread pool to avoid blocking
+        loop = asyncio.get_event_loop()
+        detected_model = await loop.run_in_executor(None, get_model_from_server, port)
+        if detected_model:
+            model = detected_model
+            print(f"Auto-detected model: {model}")
+        else:
+            model = "any"  # Fallback for candle-vllm compatibility
+            print("Using default model 'any' (candle-vllm compatibility mode)")
+    else:
+        print(f"Using specified model: {model}")
     # candidate requests
     prompts = []
     for i in range(batch):
@@ -167,5 +192,6 @@ if __name__ == "__main__":
     parser.add_argument('--batch', default=16, type=int)
     parser.add_argument('--max_tokens', default=1024, type=int)
     parser.add_argument('--port', default=2000, type=int)
+    parser.add_argument('--model', default=None, type=str, help='Model name to use (auto-detected if not specified)')
     args = parser.parse_args()
-    asyncio.run(benchmark(args.batch, args.max_tokens, args.port))
+    asyncio.run(benchmark(args.batch, args.max_tokens, args.port, args.model))
